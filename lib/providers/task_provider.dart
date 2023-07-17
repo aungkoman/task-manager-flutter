@@ -9,11 +9,11 @@ import '../models/task.dart';
 class TaskProvider extends ChangeNotifier {
   // data repo
   List<Task> taskList = [
-    Task(id: "1", name: "one", status: "pending"),
-    Task(id: "2", name: "two", status: "pending"),
-    Task(id: "3", name: "three", status: "done"),
-    Task(id: "4", name: "four", status: "pending"),
-    Task(id: "5", name: "five", status: "pending"),
+    // Task(id: "1", name: "one", status: "pending"),
+    // Task(id: "2", name: "two", status: "pending"),
+    // Task(id: "3", name: "three", status: "done"),
+    // Task(id: "4", name: "four", status: "pending"),
+    // Task(id: "5", name: "five", status: "pending"),
   ];
 
 
@@ -60,12 +60,29 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateTask({required Task task}){
+  void updateTask({required Task task}) async{
     for(int i=0; i< taskList.length; i++){
       if(taskList[i].id == task.id){
+        String url = "https://646996a003bb12ac208f243e.mockapi.io/api/v1/task/" + task.id;
+        Map<String, String> header = {
+          "Content-Type" : "application/x-www-form-urlencoded"
+        };
+        Map<String, String> body = {
+          "name" : task.name,
+          "status" : task.status
+        };
+        http.Response response = await  http.put(Uri.parse(url), body: body, headers: header);
         taskList[i] = task;
       }
     }
+    notifyListeners();
+  }
+
+
+  void deleteTask({required Task task}) async{
+    String url = "https://646996a003bb12ac208f243e.mockapi.io/api/v1/task/" + task.id;
+    http.Response response = await  http.delete(Uri.parse(url));
+    taskList.removeWhere((element) => element.id == task.id);
     notifyListeners();
   }
 }

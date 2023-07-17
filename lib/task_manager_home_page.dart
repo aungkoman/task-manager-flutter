@@ -25,6 +25,13 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
     );
   }
 
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Provider.of<
+  }
   Widget _mainWidget(){
     return Column(
       children: [
@@ -77,7 +84,11 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
                 }
               }
           ),
-          Text(task.name)
+          Expanded(child: Text(task.name)),
+          IconButton(onPressed: (){
+            Provider.of<TaskProvider>(context, listen: false).deleteTask(task: task);
+
+          }, icon: Icon(Icons.delete, color: Colors.red,))
         ],
       ),
     );
