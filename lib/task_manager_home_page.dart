@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:taskmanager/providers/task_provider.dart';
+import 'package:taskmanager/util/loading_overlay.dart';
 
 import 'models/task.dart';
 
@@ -56,9 +57,12 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
               controller: textEditingController,
             )
         ),
-        ElevatedButton(onPressed: (){
+        ElevatedButton(onPressed: ()async{
+          LoadingDialog.show(context);
           Task task = Task(id:"", name: textEditingController.text, status: "pending");
-          Provider.of<TaskProvider>(context, listen: false).addTask(task: task);
+          bool status = await Provider.of<TaskProvider>(context, listen: false).addTask(task: task);
+          textEditingController.clear();
+          LoadingDialog.hide(context);
         }, child: Text("Create Task")),
       ],
     );
@@ -72,21 +76,25 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
         children: [
           Checkbox(
               value: task.status == "pending" ? false : true,
-              onChanged: (checkboxStatus) {
+              onChanged: (checkboxStatus) async{
                 print("checkBoxStatus is $checkboxStatus");
+                LoadingDialog.show(context);
                 if(checkboxStatus == true){
                   task.status = "done";
-                  Provider.of<TaskProvider>(context, listen: false).updateTask(task: task);
+                  bool status = await Provider.of<TaskProvider>(context, listen: false).updateTask(task: task);
                 }
                 else{
                   task.status = "pending";
-                  Provider.of<TaskProvider>(context, listen: false).updateTask(task: task);
+                  bool status = await Provider.of<TaskProvider>(context, listen: false).updateTask(task: task);
                 }
+                LoadingDialog.hide(context);
               }
           ),
           Expanded(child: Text(task.name)),
-          IconButton(onPressed: (){
-            Provider.of<TaskProvider>(context, listen: false).deleteTask(task: task);
+          IconButton(onPressed: () async{
+            LoadingDialog.show(context);
+            bool status = await Provider.of<TaskProvider>(context, listen: false).deleteTask(task: task);
+            LoadingDialog.hide(context);
 
           }, icon: Icon(Icons.delete, color: Colors.red,))
         ],
@@ -96,8 +104,10 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
 
   Widget _fab(){
     return FloatingActionButton(
-      onPressed: (){
-        Provider.of<TaskProvider>(context, listen: false).selectTask();
+      onPressed: ()async{
+        LoadingDialog.show(context);
+        await Provider.of<TaskProvider>(context, listen: false).selectTask();
+        LoadingDialog.hide(context);
       },
       child: Icon(Icons.refresh),
     );

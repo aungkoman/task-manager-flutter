@@ -18,26 +18,31 @@ class TaskProvider extends ChangeNotifier {
 
 
   // methods
-  void selectTask()async{
+  Future<bool> selectTask()async{
     String url = "https://646996a003bb12ac208f243e.mockapi.io/api/v1/task";
     print("GET request to $url");
     http.Response response = await http.get(Uri.parse(url));
     print("status code is ${response.statusCode}");
     print("response.body  is ${response.body}");
-
-    List<dynamic> responseBody = jsonDecode(response.body) ;
-    print(responseBody);
-
-    print(responseBody.length);
-    for(int i=0; i < responseBody.length; i++){
-      dynamic item = responseBody[i];
-      Task task = Task(id: item['id'], name: item['name'], status: item['status']);
-      taskList.add(task);
+    if(response.statusCode == 200){
+      List<dynamic> responseBody = jsonDecode(response.body) ;
+      print(responseBody);
+      print(responseBody.length);
+      taskList.clear();
+      for(int i=0; i < responseBody.length; i++){
+        dynamic item = responseBody[i];
+        Task task = Task(id: item['id'], name: item['name'], status: item['status']);
+        taskList.add(task);
+      }
+      notifyListeners();
+      return true;
     }
-    notifyListeners();
+    else{
+      return false;
+    }
   }
 
-  void addTask({required Task task}) async{
+  Future<bool> addTask({required Task task}) async{
 
     // server
     String url = "https://646996a003bb12ac208f243e.mockapi.io/api/v1/task";
@@ -52,15 +57,23 @@ class TaskProvider extends ChangeNotifier {
     print("status code is ${response.statusCode}");
     print("response.body  is ${response.body}");
 
-    String responseText = response.body;
-    dynamic responseObj = jsonDecode(responseText);
-    String id = responseObj["id"];
-    task.id  = id;
-    taskList.add(task);
-    notifyListeners();
+    if(response.statusCode == 201){
+      String responseText = response.body;
+      dynamic responseObj = jsonDecode(responseText);
+      String id = responseObj["id"];
+      task.id  = id;
+      taskList.add(task);
+      notifyListeners();
+      return true;
+    }
+    else{
+      return false;
+    }
+
+
   }
 
-  void updateTask({required Task task}) async{
+  Future<bool> updateTask({required Task task}) async{
     for(int i=0; i< taskList.length; i++){
       if(taskList[i].id == task.id){
         String url = "https://646996a003bb12ac208f243e.mockapi.io/api/v1/task/" + task.id;
@@ -72,17 +85,31 @@ class TaskProvider extends ChangeNotifier {
           "status" : task.status
         };
         http.Response response = await  http.put(Uri.parse(url), body: body, headers: header);
-        taskList[i] = task;
+        if(response.statusCode == 200){
+          taskList[i] = task;
+          notifyListeners();
+          return true;
+        }
+        else{
+          return false;
+        }
       }
     }
-    notifyListeners();
+    return true;
   }
 
 
-  void deleteTask({required Task task}) async{
+  Future<bool> deleteTask({required Task task}) async{
     String url = "https://646996a003bb12ac208f243e.mockapi.io/api/v1/task/" + task.id;
     http.Response response = await  http.delete(Uri.parse(url));
-    taskList.removeWhere((element) => element.id == task.id);
-    notifyListeners();
+    if(response.statusCode == 200){
+      taskList.removeWhere((element) => element.id == task.id);
+      notifyListeners();
+      return true;
+    }
+    else{
+      return false;
+    }
+
   }
 }
