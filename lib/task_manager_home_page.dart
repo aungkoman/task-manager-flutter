@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:taskmanager/providers/task_provider.dart';
+
+import 'models/task.dart';
 
 class TaskManagerHomePage extends StatefulWidget {
   const TaskManagerHomePage({Key? key}) : super(key: key);
@@ -8,6 +12,8 @@ class TaskManagerHomePage extends StatefulWidget {
 }
 
 class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
+
+  TextEditingController textEditingController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,6 +21,7 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
         title: Text("Task Manager"),
       ),
       body: _mainWidget(),
+      floatingActionButton: _fab(),
     );
   }
 
@@ -25,9 +32,9 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
 
         Expanded(
           child: ListView.separated(
-              itemBuilder: (context, index) => _taskCard(),
+              itemBuilder: (context, index) => _taskCard(task: Provider.of<TaskProvider>(context, listen:true).taskList[index]),
               separatorBuilder: (context, index) => Divider(),
-              itemCount: 10
+              itemCount: Provider.of<TaskProvider>(context, listen:true).taskList.length
           ),
         )
       ],
@@ -37,16 +44,51 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
   Widget _inputRow(){
     return Row(
       children: [
-        Expanded(child: TextFormField()),
-        ElevatedButton(onPressed: (){}, child: Text("Create Task")),
+        Expanded(
+            child: TextFormField(
+              controller: textEditingController,
+            )
+        ),
+        ElevatedButton(onPressed: (){
+          Task task = Task(id:"", name: textEditingController.text, status: "pending");
+          Provider.of<TaskProvider>(context, listen: false).addTask(task: task);
+        }, child: Text("Create Task")),
       ],
     );
   }
 
-  Widget _taskCard(){
+  Widget _taskCard({required Task task}){
     return Container(
       height: 50,
       color: Colors.green,
+      child: Row(
+        children: [
+          Checkbox(
+              value: task.status == "pending" ? false : true,
+              onChanged: (checkboxStatus) {
+                print("checkBoxStatus is $checkboxStatus");
+                if(checkboxStatus == true){
+                  task.status = "done";
+                  Provider.of<TaskProvider>(context, listen: false).updateTask(task: task);
+                }
+                else{
+                  task.status = "pending";
+                  Provider.of<TaskProvider>(context, listen: false).updateTask(task: task);
+                }
+              }
+          ),
+          Text(task.name)
+        ],
+      ),
+    );
+  }
+
+  Widget _fab(){
+    return FloatingActionButton(
+      onPressed: (){
+        Provider.of<TaskProvider>(context, listen: false).selectTask();
+      },
+      child: Icon(Icons.refresh),
     );
   }
 }

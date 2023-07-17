@@ -1,8 +1,9 @@
 class Task{
   // attributes
+  String id;
   String name;
   String status;
 
   // constructor
-  Task({required this.name, required this.status});
+  Task({required this.id, required this.name, required this.status});
 }
