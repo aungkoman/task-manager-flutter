@@ -30,7 +30,7 @@ class _TaskManagerHomePageState extends State<TaskManagerHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    Provider.of<
+    Provider.of<TaskProvider>(context, listen: false).selectTask();
   }
   Widget _mainWidget(){
     return Column(
