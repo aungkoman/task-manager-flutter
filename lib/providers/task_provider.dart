@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:taskmanager/our_db.dart';
 import '../models/task.dart';
 
 class TaskProvider extends ChangeNotifier {
@@ -19,6 +20,12 @@ class TaskProvider extends ChangeNotifier {
 
   // methods
   Future<bool> selectTask()async{
+      OurDB ourDB = OurDB();
+      taskList = await ourDB.selectTasks();
+      notifyListeners();
+      return true;
+    /*
+
     String url = "https://646996a003bb12ac208f243e.mockapi.io/api/v1/task";
     print("GET request to $url");
     http.Response response = await http.get(Uri.parse(url));
@@ -40,9 +47,19 @@ class TaskProvider extends ChangeNotifier {
     else{
       return false;
     }
+
+     */
   }
 
   Future<bool> addTask({required Task task}) async{
+    OurDB ourDb = OurDB();
+    task.id = (taskList.length + 1 ).toString();
+    ourDb.insertTask(task: task);
+    taskList.add(task);
+    notifyListeners();
+    return true;
+    /*
+
 
     // server
     String url = "https://646996a003bb12ac208f243e.mockapi.io/api/v1/task";
@@ -69,6 +86,8 @@ class TaskProvider extends ChangeNotifier {
     else{
       return false;
     }
+
+     */
 
 
   }
